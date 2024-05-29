@@ -3,6 +3,7 @@
 <head>
 <title>主题详解 - News-sentiment</title>
 <script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="../layout/styles/layout.css" rel="stylesheet" type="text/css" media="all">
@@ -146,7 +147,7 @@
       <!-- ################################################################################################ -->
       <h1>白酒行业</h1>
       <p>10月29日，2022年</p>
-       <div id="myChart" style="width:100%; height:400px;"></div>
+       <div id="myStockChart" style="width:100%; height:400px;"></div>
        <div class="clear"></div>
     <!-- ################################################################################################ -->
     <!-- ################################################################################################ -->
@@ -201,40 +202,66 @@
 <!-- Custom Script for Dropdown Menu1 -->
 <script src="../layout/scripts/dropdown.js"></script>
 <script>
-Highcharts.chart('myChart', {
-    chart: {
-        type: 'line'
-    },
-    title: {
-        text: '简单的股价示例'
-    },
-    subtitle: {
-        text: '来源: Example.com'
-    },
-    xAxis: {
-        categories: ['一月', '二月', '三月', '四月', '五月', '六月',
-            '七月', '八月', '九月', '十月', '十一月', '十二月']
-    },
-    yAxis: {
-        title: {
-            text: '价格 (元)'
+document.addEventListener('DOMContentLoaded', function () {
+    Papa.parse('白酒行业_fitted_topic_attention_arma.csv', {
+        download: true,
+        header: true,
+        complete: function(results) {
+            var data = results.data;
+            var categories = [];
+            var seriesData = [];
+            var confidenceLower = [];
+            var confidenceUpper = [];
+
+            data.forEach(function(item) {
+                categories.push(item['时间（周）']);
+                seriesData.push(parseFloat(item['话题热度占比（%）']));
+                confidenceLower.push(parseFloat(item['95%置信区间下界（%）']));
+                confidenceUpper.push(parseFloat(item['95%置信区间上界（%）']));
+            });
+
+            Highcharts.chart('myStockChart', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: '话题热度及置信区间'
+                },
+                xAxis: {
+                    categories: categories,
+                    title: {
+                        text: '时间（周）'
+                    },
+                    crosshair: true
+                },
+                yAxis: {
+                    title: {
+                        text: '话题热度占比（%）'
+                    }
+                },
+                series: [{
+                    name: '话题热度占比',
+                    data: seriesData
+                }, {
+                    name: '95%置信区间下界',
+                    data: confidenceLower
+                }, {
+                    name: '95%置信区间上界',
+                    data: confidenceUpper
+                }],
+                tooltip: {
+                    shared: true
+                },
+                plotOptions: {
+                    line: {
+                        marker: {
+                            enabled: true
+                        }
+                    }
+                }
+            });
         }
-    },
-    plotOptions: {
-        line: {
-            dataLabels: {
-                enabled: true
-            },
-            enableMouseTracking: false
-        }
-    },
-    series: [{
-        name: '东京',
-        data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-    }, {
-        name: '伦敦',
-        data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
-    }]
+    });
 });
 </script>
 </body>
