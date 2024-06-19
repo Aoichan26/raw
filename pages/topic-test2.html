@@ -147,7 +147,7 @@
       <!-- ################################################################################################ -->
       <h1>白酒行业</h1>
       <p>10月29日，2022年</p>
-      <div id="myStockChart" style="width:100%; height:400px;"></div>
+      <div id="container" style="height: 400px; min-width: 310px"></div>
       <div class="clear"></div>
   </main>
 </div>
@@ -204,29 +204,34 @@ document.addEventListener('DOMContentLoaded', function () {
         header: true,
         complete: function(results) {
             var data = results.data;
-            var chartData = data.map(function(item) {
-                var year = item['时间（周）'].substring(0, 4);
-                var week = item['时间（周）'].substring(4, 6);
-                var startDate = new Date(year);
-                startDate.setDate(startDate.getDate() + (week - 1) * 7);
-
-                return [
-                    startDate.getTime(),
-                    parseFloat(item['话题热度占比（%）']),
-                    [parseFloat(item['95%置信区间下界（%）']), parseFloat(item['95%置信区间上界（%）'])]
-                ];
+            var seriesData = data.map(function(item) {
+                return {
+                    x: item['时间（周）'],
+                    y: parseFloat(item['话题热度占比（%）']),
+                    low: parseFloat(item['95%置信区间下界（%）']),
+                    high: parseFloat(item['95%置信区间上界（%）'])
+                };
             });
 
-            Highcharts.stockChart('myStockChart', {
+            // 创建 Highcharts Stock 图表
+            Highcharts.stockChart('container', {
                 rangeSelector: {
                     selected: 1
                 },
                 title: {
                     text: '话题热度时间序列'
                 },
+                xAxis: {
+                    type: 'category'
+                },
+                yAxis: {
+                    title: {
+                        text: '话题热度占比'
+                    }
+                },
                 series: [{
                     name: '话题热度占比',
-                    data: chartData,
+                    data: seriesData,
                     tooltip: {
                         valueDecimals: 2
                     }
@@ -238,3 +243,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 </body>
 </html>
+
