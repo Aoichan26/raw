@@ -203,34 +203,30 @@ document.addEventListener('DOMContentLoaded', function () {
         download: true,
         header: true,
         complete: function(results) {
-            var data = results.data;
-            var seriesData = data.map(function(item) {
-                return {
-                    x: item['时间（周）'],
-                    y: parseFloat(item['话题热度占比（%）']),
-                    low: parseFloat(item['95%置信区间下界（%）']),
-                    high: parseFloat(item['95%置信区间上界（%）'])
-                };
+            var categories = [];
+            var seriesData = [];
+            results.data.forEach(function(item) {
+                var week = item['时间（周）'];
+                var heat = parseFloat(item['话题热度占比（%）']);
+                if (!isNaN(heat)) { // Ensure the data is valid
+                    categories.push(week);
+                    seriesData.push([week, heat]);
+                }
             });
 
-            // 创建 Highcharts Stock 图表
             Highcharts.stockChart('container', {
                 rangeSelector: {
-                    selected: 1
+                    selected: 1,
+                    inputEnabled: true
                 },
                 title: {
                     text: '话题热度时间序列'
                 },
                 xAxis: {
-                    type: 'category'
-                },
-                yAxis: {
-                    title: {
-                        text: '话题热度占比'
-                    }
+                    categories: categories
                 },
                 series: [{
-                    name: '话题热度占比',
+                    name: '话题热度',
                     data: seriesData,
                     tooltip: {
                         valueDecimals: 2
