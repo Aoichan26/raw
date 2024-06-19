@@ -203,27 +203,23 @@ document.addEventListener('DOMContentLoaded', function () {
         download: true,
         header: true,
         complete: function(results) {
-            var categories = [];
-            var seriesData = [];
-            results.data.forEach(function(item) {
-                var week = item['时间（周）'];
+            var seriesData = results.data.map(function(item) {
+                var year = parseInt(item['时间（周）'].substr(0, 4), 10);
+                var week = parseInt(item['时间（周）'].substr(4, 2), 10);
+                var firstDayOfYear = new Date(year, 0, 1);
+                var dateOfISOWeek = new Date(firstDayOfYear); // Calculate the date of the first day of the given week
+                dateOfISOWeek.setDate(firstDayOfYear.getDate() + (week - 1) * 7);
                 var heat = parseFloat(item['话题热度占比（%）']);
-                if (!isNaN(heat)) { // Ensure the data is valid
-                    categories.push(week);
-                    seriesData.push([week, heat]);
-                }
+                return [dateOfISOWeek.getTime(), heat];
             });
 
+            // Create the chart
             Highcharts.stockChart('container', {
                 rangeSelector: {
-                    selected: 1,
-                    inputEnabled: true
+                    selected: 1
                 },
                 title: {
                     text: '话题热度时间序列'
-                },
-                xAxis: {
-                    categories: categories
                 },
                 series: [{
                     name: '话题热度',
@@ -239,4 +235,3 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 </body>
 </html>
-
