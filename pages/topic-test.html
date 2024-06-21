@@ -206,7 +206,6 @@
   $(document).ready(function() {
     $.get('大数据_fitted_predicted_topic_attention_arma.csv', function(data) {
       var lines = data.split('\n');
-      var categories = [];
       var topicHeatRatio = [];
       var upperConfidence = [];
       var lowerConfidence = [];
@@ -218,7 +217,6 @@
         var items = lines[i].split(',');
         if (items.length === 7) {
           var date = Date.parse(items[0].replace(/\//g, '-')); // Convert date to timestamp
-          categories.push(date);
           topicHeatRatio.push([date, parseFloat(items[1])]);
           upperConfidence.push([date, parseFloat(items[2])]);
           lowerConfidence.push([date, parseFloat(items[3])]);
@@ -236,7 +234,10 @@
           text: '话题热度占比与预测'
         },
         xAxis: {
-          type: 'datetime'
+          type: 'datetime',
+          dateTimeLabelFormats: {
+            day: '%B %e, %Y' // "February 4, 2022" 的格式
+          }
         },
         yAxis: {
           title: {
