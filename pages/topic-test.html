@@ -204,7 +204,7 @@
 <!-- Highcharts图表代码 -->
 <script>
   $(document).ready(function() {
-    $.get('大数据.csv', function(data) {
+    $.get('大数据_fitted_predicted_topic_attention_arma.csv', function(data) {
       var lines = data.split('\n');
       var topicHeatRatio = [];
       var upperConfidence = [];
@@ -234,22 +234,16 @@
           text: '话题热度占比与预测'
         },
         xAxis: {
-          type: 'datetime',
-          dateTimeLabelFormats: {
-            millisecond: '%B %e, %Y',
-            second: '%B %e, %Y',
-            minute: '%B %e, %Y',
-            hour: '%B %e, %Y',
-            day: '%B %e, %Y',
-            week: '%B %e, %Y',
-            month: '%B %e, %Y',
-            year: '%B %e, %Y'
-          }
+          type: 'datetime'
         },
         yAxis: {
           title: {
             text: '百分比（%）'
           }
+        },
+        tooltip: {
+          xDateFormat: '%B %e, %Y', // "February 4, 2022" 的格式
+          split: true
         },
         series: [{
           name: '话题热度占比',
