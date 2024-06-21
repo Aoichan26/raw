@@ -204,7 +204,7 @@
 <!-- Highcharts图表代码 -->
 <script>
   $(document).ready(function() {
-    $.get('大数据_fitted_predicted_topic_attention_arma.csv', function(data) {
+    $.get('大数据.csv', function(data) {
       var lines = data.split('\n');
       var topicHeatRatio = [];
       var upperConfidence = [];
@@ -236,7 +236,14 @@
         xAxis: {
           type: 'datetime',
           dateTimeLabelFormats: {
-            day: '%B %e, %Y' // "February 4, 2022" 的格式
+            millisecond: '%B %e, %Y',
+            second: '%B %e, %Y',
+            minute: '%B %e, %Y',
+            hour: '%B %e, %Y',
+            day: '%B %e, %Y',
+            week: '%B %e, %Y',
+            month: '%B %e, %Y',
+            year: '%B %e, %Y'
           }
         },
         yAxis: {
