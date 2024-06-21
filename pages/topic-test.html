@@ -2,13 +2,12 @@
 <html>
 <head>
 <title>主题详解 - News-sentiment</title>
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/modules/export-data.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="../layout/styles/layout.css" rel="stylesheet" type="text/css" media="all">
+<!-- 引入Highcharts库 -->
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 </head>
 <body id="top">
 <!-- ################################################################################################ -->
@@ -149,99 +148,7 @@
       <!-- ################################################################################################ -->
       <h1>白酒行业</h1>
       <p>10月29日，2022年</p>
-       <div id="container" style="width:100%; height:400px;"></div>
-       <script type="text/javascript">
-           document.addEventListener('DOMContentLoaded', function() {
-            // URL of the CSV file
-            const csvFileUrl = '白酒行业_fitted_topic_attention_arma.csv';
-            
-            // Fetch the CSV file
-            fetch(csvFileUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(csvText => {
-                    Papa.parse(csvText, {
-                        complete: function(results) {
-                            const data = results.data;
-                            console.log('Raw Data:', data); // Debug: log the raw data
-
-                            const categories = [];
-                            const upperBound = [];
-                            const lowerBound = [];
-                            const predictedTopicHeat = [];
-
-                            // Assuming the first row is the header
-                            for (let i = 1; i < data.length; i++) {
-                                const row = data[i];
-                                console.log(`Row ${i}:`, row); // Debug: log each row
-
-                                const week = row['时间（周）'];
-                                const upper = parseFloat(row['95%置信区间上界（%）']);
-                                const lower = parseFloat(row['95%置信区间下界（%）']);
-                                const predicted = parseFloat(row['话题热度占比（%）']);
-
-                                if (week) {
-                                    categories.push(week.toString());
-                                }
-                                if (!isNaN(upper)) {
-                                    upperBound.push(upper);
-                                }
-                                if (!isNaN(lower)) {
-                                    lowerBound.push(lower);
-                                }
-                                if (!isNaN(predicted)) {
-                                    predictedTopicHeat.push(predicted);
-                                }
-                            }
-
-                            // Debugging output to check data
-                            console.log('Categories:', categories);
-                            console.log('Upper Bound:', upperBound);
-                            console.log('Lower Bound:', lowerBound);
-                            console.log('Predicted Topic Heat:', predictedTopicHeat);
-
-                            Highcharts.chart('container', {
-                                chart: {
-                                    type: 'line'
-                                },
-                                title: {
-                                    text: 'Line Chart'
-                                },
-                                xAxis: {
-                                    categories: categories
-                                },
-                                yAxis: {
-                                    title: {
-                                        text: 'Values'
-                                    }
-                                },
-                                series: [{
-                                    name: '95%置信区间上界（%）',
-                                    data: upperBound
-                                }, {
-                                    name: '95%置信区间下界（%）',
-                                    data: lowerBound
-                                }, {
-                                    name: '话题热度占比预测（%）',
-                                    data: predictedTopicHeat
-                                }],
-                                accessibility: {
-                                    enabled: false
-                                }
-                            });
-                        },
-                        header: true,
-                        dynamicTyping: true,
-                        skipEmptyLines: true
-                    });
-                })
-                .catch(error => console.error('Error fetching the CSV file:', error));
-        });
-    </script>
+      <div id="chart-container" style="height: 400px; min-width: 310px"></div>
     <!-- ################################################################################################ -->
     <!-- ################################################################################################ -->
     <!-- / main body -->
@@ -294,68 +201,68 @@
 <!-- / IE9 Placeholder Support -->
 <!-- Custom Script for Dropdown Menu1 -->
 <script src="../layout/scripts/dropdown.js"></script>
+<!-- Highcharts图表代码 -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    Papa.parse('白酒行业_fitted_topic_attention_arma.csv', {
-        download: true,
-        header: true,
-        complete: function(results) {
-            var data = results.data;
-            var categories = [];
-            var seriesData = [];
-            var confidenceLower = [];
-            var confidenceUpper = [];
+  $(document).ready(function() {
+    $.get('大数据_fitted_predicted_topic_attention_arma.csv', function(data) {
+      var lines = data.split('\n');
+      var categories = [];
+      var topicHeatRatio = [];
+      var upperConfidence = [];
+      var lowerConfidence = [];
+      var topicHeatForecast = [];
+      var upperPrediction = [];
+      var lowerPrediction = [];
 
-            data.forEach(function(item) {
-                categories.push(item['时间（周）']);
-                seriesData.push(parseFloat(item['话题热度占比（%）']));
-                confidenceLower.push(parseFloat(item['95%置信区间下界（%）']));
-                confidenceUpper.push(parseFloat(item['95%置信区间上界（%）']));
-            });
-
-            Highcharts.chart('myStockChart', {
-                chart: {
-                    type: 'line'
-                },
-                title: {
-                    text: '话题热度及置信区间'
-                },
-                xAxis: {
-                    categories: categories,
-                    title: {
-                        text: '时间（周）'
-                    },
-                    crosshair: true
-                },
-                yAxis: {
-                    title: {
-                        text: '话题热度占比（%）'
-                    }
-                },
-                series: [{
-                    name: '话题热度占比',
-                    data: seriesData
-                }, {
-                    name: '95%置信区间下界',
-                    data: confidenceLower
-                }, {
-                    name: '95%置信区间上界',
-                    data: confidenceUpper
-                }],
-                tooltip: {
-                    shared: true
-                },
-                plotOptions: {
-                    line: {
-                        marker: {
-                            enabled: true
-                        }
-                    }
-                }
-            });
+      for (var i = 1; i < lines.length; i++) { // Skip the header
+        var items = lines[i].split(',');
+        if (items.length === 7) {
+          var date = Date.parse(items[0].replace(/\//g, '-')); // Convert date to timestamp
+          categories.push(date);
+          topicHeatRatio.push([date, parseFloat(items[1])]);
+          upperConfidence.push([date, parseFloat(items[2])]);
+          lowerConfidence.push([date, parseFloat(items[3])]);
+          topicHeatForecast.push([date, parseFloat(items[4])]);
+          upperPrediction.push([date, parseFloat(items[5])]);
+          lowerPrediction.push([date, parseFloat(items[6])]);
         }
+      }
+
+      Highcharts.stockChart('chart-container', {
+        rangeSelector: {
+          selected: 1
+        },
+        title: {
+          text: '话题热度占比与预测'
+        },
+        xAxis: {
+          type: 'datetime'
+        },
+        yAxis: {
+          title: {
+            text: '百分比（%）'
+          }
+        },
+        series: [{
+          name: '话题热度占比',
+          data: topicHeatRatio
+        }, {
+          name: '95%置信区间上界',
+          data: upperConfidence
+        }, {
+          name: '95%置信区间下界',
+          data: lowerConfidence
+        }, {
+          name: '话题热度占比预测',
+          data: topicHeatForecast
+        }, {
+          name: '预测区间上界',
+          data: upperPrediction
+        }, {
+          name: '预测区间下界',
+          data: lowerPrediction
+        }]
+      });
     });
-});
+  });
 </script>
-</body>
-</html>
