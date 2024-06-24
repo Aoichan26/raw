@@ -150,7 +150,7 @@
       <p>10月29日，2022年</p>
       <div id="chart-container" style="height: 400px; min-width: 310px"></div>
       <!-- 新增词云图容器 -->
-      <div id="word-cloud" style="height: 600px; min-width: 310px; margin-top: 20px;"></div>
+      <div id="word-cloud" style="min-width: 310px; margin-top: 20px;"></div>
     <!-- ################################################################################################ -->
     <!-- ################################################################################################ -->
     <!-- / main body -->
@@ -282,13 +282,21 @@
       }
 
       Highcharts.chart('word-cloud', {
+        chart: {
+          height: 400,  // 调整图表高度
+          width: 600    // 调整图表宽度
+        },
         series: [{
           type: 'wordcloud',
           data: words,
           name: 'Weight',
-          placementStrategy: 'random',
-          minFontSize: 10, // 调整最小字体大小
-          maxFontSize: 50  // 调整最大字体大小
+          minFontSize: 14, // 调整最小字体大小
+          maxFontSize: 50, // 调整最大字体大小
+          rotation: {
+            from: 0,
+            to: 0  // 禁用旋转，使词更紧凑
+          },
+          placementStrategy: 'center'
         }],
         title: {
           text: '词云图'
@@ -307,5 +315,3 @@
     });
   });
 </script>
-</body>
-</html>
