@@ -9,18 +9,10 @@
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 <!-- 引入D3.js和d3-cloud库 -->
-<title>Word Cloud</title>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        #word-cloud {
-            width: 100%;
-            height: 600px;
-        }
-    </style>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+<!-- 引入Google Fonts中的Noto Sans SC字体 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body id="top">
 <!-- ################################################################################################ -->
@@ -283,46 +275,20 @@
     });
 
     // 词云图代码
-    <script>
-        var words = [
-            {word: "汾酒", weight: 1},
-            {word: "茅台", weight: 0.628797774},
-            {word: "茅台酒", weight: 0.469940448},
-            {word: "五粮液", weight: 0.452013145},
-            {word: "白酒", weight: 0.408588832},
-            {word: "飞天酒业", weight: 0.31505307},
-            {word: "酒业", weight: 0.310173081},
-            {word: "特别国债", weight: 0.247208829},
-            {word: "酒企", weight: 0.239540041},
-            {word: "酱香", weight: 0.236328028},
-            {word: "舍得", weight: 0.213997004},
-            {word: "名酒", weight: 0.210919071},
-            {word: "泸州老窖", weight: 0.210472891},
-            {word: "刘昆", weight: 0.195582115},
-            {word: "预算", weight: 0.192920054},
-            {word: "非税收入", weight: 0.186929753},
-            {word: "转移支付", weight: 0.176544767},
-            {word: "三保", weight: 0.176181292},
-            {word: "贵州茅台", weight: 0.174278952},
-            {word: "酒厂", weight: 0.155195808},
-            {word: "财政收入", weight: 0.150974904},
-            {word: "酿造", weight: 0.136472265},
-            {word: "酒类", weight: 0.135510603},
-            {word: "酿酒", weight: 0.135320253},
-            {word: "预算收入", weight: 0.13166548}
-        ];
+    d3.csv("白酒行业_word_cloud.csv").then(function(data) {
+        var words = data.map(function(d) {
+            return {text: d.word, size: +d.weight * 100};
+        });
 
         var width = document.getElementById('word-cloud').offsetWidth;
         var height = document.getElementById('word-cloud').offsetHeight;
 
         var layout = d3.layout.cloud()
             .size([width, height])
-            .words(words.map(function(d) {
-                return {text: d.word, size: d.weight * 100};
-            }))
+            .words(words)
             .padding(5)
             .rotate(function() { return ~~(Math.random() * 2) * 90; })
-            .font("Impact")
+            .font("Noto Sans SC")  // 修改字体为支持中文的Noto Sans SC
             .fontSize(function(d) { return d.size; })
             .on("end", draw);
 
@@ -338,7 +304,7 @@
                 .data(words)
                 .enter().append("text")
                 .style("font-size", function(d) { return d.size + "px"; })
-                .style("font-family", "Impact")
+                .style("font-family", "Noto Sans SC")  // 修改字体为支持中文的Noto Sans SC
                 .style("fill", function(d, i) { return d3.schemeCategory10[i % 10]; })
                 .attr("text-anchor", "middle")
                 .attr("transform", function(d) {
@@ -346,6 +312,10 @@
                 })
                 .text(function(d) { return d.text; });
         }
-    </script>
+    }).catch(function(error){
+        console.log(error);
+    });
+  });
+</script>
 </body>
 </html>
