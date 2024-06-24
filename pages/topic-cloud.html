@@ -220,13 +220,14 @@
       for (var i = 1; i < lines.length; i++) { // Skip the header
         var items = lines[i].split(',');
         if (items.length === 7) {
-          var date = Date.parse(items[0].replace(/\//g, '-')); // Convert date to timestamp
-          topicHeatRatio.push([date, parseFloat(items[1])]);
-          upperConfidence.push([date, parseFloat(items[2])]);
-          lowerConfidence.push([date, parseFloat(items[3])]);
-          topicHeatForecast.push([date, parseFloat(items[4])]);
-          upperPrediction.push([date, parseFloat(items[5])]);
-          lowerPrediction.push([date, parseFloat(items[6])]);
+          var date = new Date(items[0]); // Ensure date is correctly parsed
+          var timestamp = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()); // Convert to UTC timestamp
+          topicHeatRatio.push([timestamp, parseFloat(items[1])]);
+          upperConfidence.push([timestamp, parseFloat(items[2])]);
+          lowerConfidence.push([timestamp, parseFloat(items[3])]);
+          topicHeatForecast.push([timestamp, parseFloat(items[4])]);
+          upperPrediction.push([timestamp, parseFloat(items[5])]);
+          lowerPrediction.push([timestamp, parseFloat(items[6])]);
         }
       }
 
@@ -246,7 +247,7 @@
           }
         },
         tooltip: {
-          xDateFormat: '%B %e, %Y', // "February 4, 2022" 的格式
+          xDateFormat: '%Y-%m-%d', // Format to display date correctly
           split: true
         },
         series: [{
@@ -270,6 +271,7 @@
         }]
       });
     });
+
 
    // 使用Highcharts生成词云图
     $.get('白酒行业_word_cloud1.csv', function(data) {
