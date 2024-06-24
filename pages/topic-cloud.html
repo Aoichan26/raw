@@ -275,7 +275,7 @@
     });
 
     // 词云图代码
-    d3.csv("白酒行业_word_cloud.csv").then(function(data) {
+    d3.csv("白酒行业_word_cloud1.csv").then(function(data) {
         var words = data.map(function(d) {
             return {text: d.word, size: +d.weight * 100};
         });
