@@ -301,10 +301,12 @@
           placementStrategy: 'center'
         }],
         title: {
-          text: '词云图'
+          text: '白酒行业词云图'
         },
-        tooltip: {
-          pointFormat: '{point.name}: <b>{point.weight}</b>'
+       tooltip: {
+          formatter: function() {
+            return '<b>' + this.point.name + '</b><br>权重: <b>' + this.point.weight + '</b>';
+          }
         },
         plotOptions: {
           wordcloud: {
