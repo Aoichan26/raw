@@ -270,14 +270,14 @@
     });
 
    // 使用Highcharts生成词云图
-    $.get('白酒行业_word_cloud1.csv', function(data) {
+    $.get('餐饮市场_word_cloud.csv', function(data) {
       var lines = data.split('\n');
       var words = [];
 
       for (var i = 1; i < lines.length; i++) { // Skip the header
         var items = lines[i].split(',');
-        if (items.length === 2) {
-          words.push({name: items[0], weight: parseFloat(items[1])});
+        if (items.length === 3) { // 3 columns: index, word, weight
+          words.push({name: items[1], weight: parseFloat(items[2])});
         }
       }
 
@@ -302,7 +302,9 @@
           text: '词云图'
         },
         tooltip: {
-          pointFormat: '{point.name}: <b>{point.weight}</b>'
+          formatter: function() {
+            return '<b>' + this.point.name + '</b><br>权重: <b>' + this.point.weight + '</b>';
+          }
         },
         plotOptions: {
           wordcloud: {
@@ -315,3 +317,5 @@
     });
   });
 </script>
+</body>
+</html>
