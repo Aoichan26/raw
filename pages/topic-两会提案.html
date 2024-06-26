@@ -5,6 +5,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="../layout/styles/layout.css" rel="stylesheet" type="text/css" media="all">
+<!-- 引入Highcharts库和词云插件 -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/wordcloud.js"></script>
 </head>
 <body id="top">
 <!-- ################################################################################################ -->
@@ -26,8 +29,7 @@
   <nav id="mainav" class="hoc clear"> 
     <!-- ################################################################################################ -->
     <ul class="clear">
-      <li><a href="../index.html">关于</a></li>
-      <li><a href="新闻分类.html">新闻分类</a></li>
+      <li><a href="../sentiment.html">关于</a></li>
       <li class="active"><a class="drop" href="#">新闻舆情</a>
         <ul>
           <li class="active"><a href="sidebar-left.html">主题详解</a></li>
@@ -146,71 +148,9 @@
       <!-- ################################################################################################ -->
       <h1>两会提案</h1>
       <p>10月29日，2022年</p>
-      <div class='tableauPlaceholder' id='viz1706622251536' style='position: relative'>
-        <noscript>
-          <a href='#'><img alt='两会提案话题热度占比时间序列图 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;ts&#47;ts_16661607708790&#47;1&#47;1_rss.png' style='border: none' /></a>
-        </noscript>
-        <object class='tableauViz' style='display:none;'>
-          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-          <param name='embed_code_version' value='3' />
-          <param name='site_root' value='' />
-          <param name='name' value='ts_16661607708790&#47;1' />
-          <param name='tabs' value='no' />
-          <param name='toolbar' value='yes' />
-          <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;ts&#47;ts_16661607708790&#47;1&#47;1_rss.png' />
-          <param name='animate_transition' value='yes' />
-          <param name='display_static_image' value='yes' />
-          <param name='display_spinner' value='yes' />
-          <param name='display_overlay' value='yes' />
-          <param name='display_count' value='yes' />
-          <param name='language' value='zh-CN' />
-        </object>
-      </div>
-      <script type='text/javascript'>
-        var divElement = document.getElementById('viz1706622251536');
-        var vizElement = divElement.getElementsByTagName('object')[0];
-        vizElement.style.width='100%';
-        vizElement.style.height=(divElement.offsetWidth*0.75)+'px';
-        var scriptElement = document.createElement('script');
-        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-        vizElement.parentNode.insertBefore(scriptElement, vizElement);
-      </script>
-
-
-      <!-- ################################################################################################ -->
-      <!-- ################################################################################################ -->
-      <div class='tableauPlaceholder' id='viz1706622140936' style='position: relative'>
-        <noscript>
-          <a href='#'><img alt='两会提案词云图 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;wo&#47;wordcloud_16661719142210&#47;1&#47;1_rss.png' style='border: none' /></a>
-        </noscript>
-        <object class='tableauViz' style='display:none;'>
-          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-          <param name='embed_code_version' value='3' />
-          <param name='site_root' value='' />
-          <param name='name' value='wordcloud_16661719142210&#47;1' />
-          <param name='tabs' value='no' />
-          <param name='toolbar' value='yes' />
-          <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;wo&#47;wordcloud_16661719142210&#47;1&#47;1.png' />
-          <param name='animate_transition' value='yes' />
-          <param name='display_static_image' value='yes' />
-          <param name='display_spinner' value='yes' />
-          <param name='display_overlay' value='yes' />
-          <param name='display_count' value='yes' />
-          <param name='language' value='en-US' />
-        </object>
-      </div>
-      <script type='text/javascript'>
-        var divElement = document.getElementById('viz1706622140936');
-        var vizElement = divElement.getElementsByTagName('object')[0];
-        vizElement.style.width='100%';
-        vizElement.style.height=(divElement.offsetWidth*0.75)+'px';
-        var scriptElement = document.createElement('script');
-        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-        vizElement.parentNode.insertBefore(scriptElement, vizElement);
-      </script>
-    </div>
-
-
+      <div id="chart-container" style="height: 400px; min-width: 310px"></div>
+      <!-- 新增词云图容器 -->
+      <div id="word-cloud" style="min-width: 310px; margin-top: 20px;"></div>
     <!-- ################################################################################################ -->
     <!-- ################################################################################################ -->
     <!-- / main body -->
@@ -263,6 +203,119 @@
 <!-- / IE9 Placeholder Support -->
 <!-- Custom Script for Dropdown Menu1 -->
 <script src="../layout/scripts/dropdown.js"></script>
-  
+<!-- Highcharts图表代码 -->
+<script>
+  $(document).ready(function() {
+    $.get('两会提案_0624.csv', function(data) {
+      var lines = data.split('\n');
+      var topicHeatRatio = [];
+      var upperConfidence = [];
+      var lowerConfidence = [];
+      var topicHeatForecast = [];
+      var upperPrediction = [];
+      var lowerPrediction = [];
+
+      for (var i = 1; i < lines.length; i++) { // Skip the header
+        var items = lines[i].split(',');
+        if (items.length === 7) {
+          var date = Date.parse(items[0].replace(/\//g, '-')); // Convert date to timestamp
+          topicHeatRatio.push([date, parseFloat(items[1])]);
+          upperConfidence.push([date, parseFloat(items[2])]);
+          lowerConfidence.push([date, parseFloat(items[3])]);
+          topicHeatForecast.push([date, parseFloat(items[4])]);
+          upperPrediction.push([date, parseFloat(items[5])]);
+          lowerPrediction.push([date, parseFloat(items[6])]);
+        }
+      }
+
+      Highcharts.stockChart('chart-container', {
+        rangeSelector: {
+          selected: 1
+        },
+        title: {
+          text: '话题热度占比与预测'
+        },
+        xAxis: {
+          type: 'datetime'
+        },
+        yAxis: {
+          title: {
+            text: '百分比（%）'
+          }
+        },
+        tooltip: {
+          xDateFormat: '%B %e, %Y', // "February 4, 2022" 的格式
+          split: true
+        },
+        series: [{
+          name: '话题热度占比',
+          data: topicHeatRatio
+        }, {
+          name: '95%置信区间上界',
+          data: upperConfidence
+        }, {
+          name: '95%置信区间下界',
+          data: lowerConfidence
+        }, {
+          name: '话题热度占比预测',
+          data: topicHeatForecast
+        }, {
+          name: '预测区间上界',
+          data: upperPrediction
+        }, {
+          name: '预测区间下界',
+          data: lowerPrediction
+        }]
+      });
+    });
+
+   // 使用Highcharts生成词云图
+    $.get('两会提案_word_cloud.csv', function(data) {
+      var lines = data.split('\n');
+      var words = [];
+
+      for (var i = 1; i < lines.length; i++) { // Skip the header
+        var items = lines[i].split(',');
+        if (items.length === 3) { // 3 columns: index, word, weight
+          words.push({name: items[1], weight: parseFloat(items[2])});
+        }
+      }
+
+      Highcharts.chart('word-cloud', {
+        chart: {
+          height: 400,  // 调整图表高度
+          width: 600    // 调整图表宽度
+        },
+        series: [{
+          type: 'wordcloud',
+          data: words,
+          name: 'Weight',
+          minFontSize: 14, // 调整最小字体大小
+          maxFontSize: 50, // 调整最大字体大小
+          rotation: {
+            from: 0,
+            to: 0  // 禁用旋转，使词更紧凑
+          },
+          placementStrategy: 'center'
+        }],
+        title: {
+          text: '词云图'
+        },
+        tooltip: {
+          formatter: function() {
+            return '<b>' + this.point.name + '</b><br>权重: <b>' + this.point.weight + '</b>';
+          }
+        },
+        plotOptions: {
+          wordcloud: {
+            style: {
+              fontFamily: 'Noto Sans SC'
+            }
+          }
+        }
+      });
+    });
+  });
+</script>
 </body>
 </html>
